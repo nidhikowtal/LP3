@@ -1,74 +1,94 @@
-N = 4
+class NQueens:
+    def __init__(self):
+        self.size = int(input("Enter size of chessboard: "))
+        self.board = [[False] * self.size for i in range(self.size)]
+        self.count = 0
 
-""" ld is an array where its indices indicate row-col+N-1
-(N-1) is for shifting the difference to store negative
-indices """
-ld = [0] * 30
+    def printBoard(self):
+        for row in self.board:
+            for ele in row:
+                if ele == True:
+                    print("Q", end=" ")
+                else:
+                    print("X", end=" ")
+            print()
+        print()
 
-""" rd is an array where its indices indicate row+col
-and used to check whether a queen can be placed on
-right diagonal or not"""
-rd = [0] * 30
+    def isSafe(self, row, col):
 
-"""column array where its indices indicates column and
-used to check whether a queen can be placed in that
-	row or not"""
-cl = [0] * 30
+        # Check Column(above and below of the (row,col))
+        for i in self.board:
+            if i[col] == True:
+                return False
 
-""" A utility function to print solution """
-def printSolution(board):
-	for i in range(N):
-		for j in range(N):
-			print(board[i][j], end = " ")
-		print()
+        # Check backward slash(\) diagonal only in above direction
+        i = row
+        j = col
+        while i >= 0 and j >= 0:
+            if self.board[i][j] == True:
+                return False
+            i -= 1
+            j -= 1
+        # Check backward slash(\) diagonal only in below direction
+        i = row
+        j = col
+        while i < self.size and j < self.size:
+            if self.board[i][j] == True:
+                return False
+            i += 1
+            j += 1
 
-def solveNQUtil(board, col):
-	
-	""" base case: If all queens are placed
-		then return True """
-	if (col >= N):
-		return True
-		
-	""" Consider this column and try placing
-		this queen in all rows one by one """
-	for i in range(N):
-		
-		""" Check if the queen can be placed on board[i][col] """
-		""" A check if a queen can be placed on board[row][col].
-		We just need to check ld[row-col+n-1] and rd[row+coln]
-		where ld and rd are for left and right diagonal respectively"""
-		if ((ld[i - col + N - 1] != 1 and
-			rd[i + col] != 1) and cl[i] != 1):
-				
-			""" Place this queen in board[i][col] """
-			board[i][col] = 1
-			ld[i - col + N - 1] = rd[i + col] = cl[i] = 1
-			
-			""" recur to place rest of the queens """
-			if (solveNQUtil(board, col + 1)):
-				return True
-				
-			""" If placing queen in board[i][col]
-			doesn't lead to a solution,
-			then remove queen from board[i][col] """
-			board[i][col] = 0 # BACKTRACK
-			ld[i - col + N - 1] = rd[i + col] = cl[i] = 0
+        # Check forward slash diagonal(/) only in above direction
+        i = row
+        j = col
+        while i >= 0 and j < self.size:
+            if self.board[i][j] == True:
+                return False
+            i -= 1
+            j += 1
 
-	return False
+        # Check forward slash diagonal(/) only in below direction
+        i = row
+        j = col
+        while i < self.size and j >= 0:
+            if self.board[i][j] == True:
+                return False
+            i += 1
+            j -= 1
 
-def solveNQ():
-	board = [[0, 0, 0, 0],
-			[0, 0, 0, 0],
-			[1, 0, 0, 0],
-			[0, 0, 0, 0]]
-	cl[2]=1
-	rd[2]=1
-	ld[5]=1
-	if (solveNQUtil(board, 1) == False):
-		print("Solution does not exist")
-		return False
-	printSolution(board)
-	return True
+        return True
 
-solveNQ()
+    def set_position_first_queen(self):
+        print("Enter coordinates of first queen: ")
+        row = int(input(f"Enter row (1-{self.size}): "))
+        col = int(input(f"Enter column (1-{self.size}): "))
+        self.board[row - 1][col - 1] = True
+        self.printBoard()
 
+    def solve(self, row):
+        if row == self.size:
+            self.count += 1
+            self.printBoard()
+            return
+
+        if any(self.board[row]) is True:
+            self.solve(row + 1)
+            return
+
+        for col in range(self.size):
+            if self.isSafe(row, col) == True:
+                self.board[row][col] = True
+                self.solve(row + 1)
+                self.board[row][col] = False
+
+    def displayMessage(self):
+        if self.count > 0:
+            print("Solution exists for the given position of the queen.")
+        else:
+            print("Solution doesn't exist for the given position of the queen.")
+
+
+solver = NQueens()
+solver.set_position_first_queen()
+solver.solve(0)
+solver.displayMessage()
